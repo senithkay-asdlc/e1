@@ -20,14 +20,20 @@
 
 set -e
 
-CONF=/etc/nginx/conf.d/default.conf
+# The root filesystem is read-only at runtime, so the rendered config can
+# never be written back under /etc. Render the template (read-only source)
+# into /tmp/conf.d instead; nginx.conf was pointed at /tmp/conf.d at build
+# time (see Dockerfile).
+SRC=/etc/nginx/default.conf.template
+OUT_DIR=/tmp/conf.d
+OUT="${OUT_DIR}/default.conf"
+mkdir -p "$OUT_DIR"
 
 DNS_RESOLVERS="$(awk '/^nameserver/ {print $2}' /etc/resolv.conf | tr '\n' ' ' | sed 's/ $//')"
 if [ -z "$DNS_RESOLVERS" ]; then
     echo "aep-api-proxy: no nameservers in /etc/resolv.conf; /api will 502"
     DNS_RESOLVERS="127.0.0.11"
 fi
-sed -i "s|__DNS_RESOLVERS__|${DNS_RESOLVERS}|g" "$CONF"
 
 # Primary sibling address. After copy, the coding agent sets this to the
 # UPPER_SNAKE `_URL` of the primary component-kind dependency
@@ -38,4 +44,8 @@ if [ -z "$API_BACKEND" ]; then
     echo "aep-api-proxy: primary *_URL unset; /api will 502 until OpenChoreo injects it"
     API_BACKEND="127.0.0.1:9"
 fi
-sed -i "s|__API_BACKEND__|${API_BACKEND}|g" "$CONF"
+
+sed \
+    -e "s|__DNS_RESOLVERS__|${DNS_RESOLVERS}|g" \
+    -e "s|__API_BACKEND__|${API_BACKEND}|g" \
+    "$SRC" > "$OUT"
