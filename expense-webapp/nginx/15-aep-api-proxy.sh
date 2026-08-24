@@ -29,7 +29,9 @@ set -e
 SRC=/etc/nginx/default.conf.template
 OUT_DIR=/dev/shm/conf.d
 OUT="${OUT_DIR}/default.conf"
-mkdir -p "$OUT_DIR"
+mkdir -p "$OUT_DIR" \
+    /dev/shm/client_temp /dev/shm/proxy_temp /dev/shm/fastcgi_temp \
+    /dev/shm/uwsgi_temp /dev/shm/scgi_temp
 
 DNS_RESOLVERS="$(awk '/^nameserver/ {print $2}' /etc/resolv.conf | tr '\n' ' ' | sed 's/ $//')"
 if [ -z "$DNS_RESOLVERS" ]; then
