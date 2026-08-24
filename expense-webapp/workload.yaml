@@ -8,6 +8,7 @@ endpoints:
     port: 9090
     basePath: /
     visibility:
+      - project
       - external
 
 dependencies:
