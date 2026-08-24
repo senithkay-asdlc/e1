@@ -1,0 +1,14 @@
+title Expense Claims
+
+component expense-webapp as "Expense Claims Webapp" web-application
+component expense-api as "Expense Claims API" service
+component expense-db as "Expense Claims Database" database
+
+east user-auth as "Thunder Auth" identity-server
+
+north -> expense-webapp
+
+expense-webapp -> expense-api
+expense-webapp -> user-auth
+expense-api -> user-auth
+expense-api -> expense-db

@@ -1,0 +1,274 @@
+openapi: 3.0.3
+info:
+  title: Expense Claims API
+  version: 0.1.0
+  description: Submit, review and export expense claims.
+servers:
+  - url: /
+
+paths:
+  /expense-claims:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      operationId: listExpenseClaims
+      summary: List expense claims visible to the caller
+      parameters:
+        - $ref: '#/components/parameters/Status'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200':
+          description: Page of expense claims
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [count, data]
+                properties:
+                  count: { type: integer, description: total matching items }
+                  next: { type: string, nullable: true, description: relative URI of the next page }
+                  previous: { type: string, nullable: true, description: relative URI of the previous page }
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ExpenseClaim' }
+        '401':
+          description: Missing or invalid caller identity
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    post:
+      operationId: submitExpenseClaim
+      summary: Submit a new expense claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpenseClaimInput' }
+      responses:
+        '201':
+          description: Claim created in pending status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpenseClaim' }
+        '400':
+          description: Missing or invalid claim fields
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '401':
+          description: Missing or invalid caller identity
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /expense-claims/{claimId}:
+    parameters:
+      - $ref: '#/components/parameters/ClaimId'
+      - $ref: '#/components/parameters/UserId'
+    get:
+      operationId: getExpenseClaim
+      summary: Get one expense claim
+      responses:
+        '200':
+          description: The expense claim
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpenseClaim' }
+        '403':
+          description: Caller may not view this claim
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+    put:
+      operationId: updateExpenseClaim
+      summary: Edit and resubmit a rejected claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExpenseClaimInput' }
+      responses:
+        '200':
+          description: Claim updated and returned to pending status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpenseClaim' }
+        '400':
+          description: Missing or invalid claim fields, or claim not in rejected status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Caller does not own this claim
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /expense-claims/{claimId}/approve:
+    parameters:
+      - $ref: '#/components/parameters/ClaimId'
+      - $ref: '#/components/parameters/UserId'
+    post:
+      operationId: approveExpenseClaim
+      summary: Approve a pending claim from a direct report
+      responses:
+        '200':
+          description: Claim approved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpenseClaim' }
+        '400':
+          description: Claim is not in pending status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Caller is not this claim's manager
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /expense-claims/{claimId}/reject:
+    parameters:
+      - $ref: '#/components/parameters/ClaimId'
+      - $ref: '#/components/parameters/UserId'
+    post:
+      operationId: rejectExpenseClaim
+      summary: Reject a pending claim with a reason
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, description: why the claim was rejected }
+      responses:
+        '200':
+          description: Claim rejected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExpenseClaim' }
+        '400':
+          description: Missing reason, or claim is not in pending status
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '403':
+          description: Caller is not this claim's manager
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /expense-claims/export:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+    get:
+      operationId: exportExpenseClaims
+      summary: Export approved, not-yet-exported claims to CSV and mark them exported
+      responses:
+        '200':
+          description: CSV file of approved claims
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Caller is not authorized to export claims
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+components:
+  parameters:
+    UserId:
+      name: X-User-Id
+      in: header
+      required: true
+      description: caller identity injected by the gateway from the validated token
+      schema: { type: string }
+    ClaimId:
+      name: claimId
+      in: path
+      required: true
+      description: expense claim identifier
+      schema: { type: string }
+    Status:
+      name: status
+      in: query
+      required: false
+      description: filter by claim status
+      schema: { type: string, enum: [pending, approved, rejected] }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, default: 20, maximum: 100 }
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema: { type: integer, default: 0 }
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: integer, description: HTTP or application error code }
+        message: { type: string, description: short human-readable label }
+        description: { type: string, description: detailed explanation }
+        moreInfo: { type: string, description: URI to documentation }
+
+    ExpenseClaimInput:
+      type: object
+      required: [amount, category, description, date]
+      properties:
+        amount: { type: number, description: claimed amount }
+        category: { type: string, enum: [Travel, Meals, Lodging, "Office Supplies", Other] }
+        description: { type: string, description: what the expense was for }
+        date: { type: string, format: date, description: date the expense was incurred }
+        receiptUrl: { type: string, nullable: true, description: uploaded receipt reference, optional }
+
+    ExpenseClaim:
+      allOf:
+        - $ref: '#/components/schemas/ExpenseClaimInput'
+        - type: object
+          required: [id, employeeId, status, createdAt, updatedAt]
+          properties:
+            id: { type: string }
+            employeeId: { type: string }
+            status: { type: string, enum: [pending, approved, rejected] }
+            rejectionReason: { type: string, nullable: true }
+            exported: { type: boolean, default: false }
+            createdAt: { type: string, format: date-time }
+            updatedAt: { type: string, format: date-time }
+
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+
+security:
+  - bearerAuth: []

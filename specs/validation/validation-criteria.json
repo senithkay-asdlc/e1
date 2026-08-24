@@ -1,0 +1,100 @@
+{
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "statement": "An employee can submit an expense claim with an amount, category, description and date",
+      "stories": [1],
+      "criteria": [
+        { "id": "AC-001-a", "must": "An employee can create a claim by providing amount, category, description and date", "method": "e2e" },
+        { "id": "AC-001-b", "must": "A submitted claim starts in pending status", "method": "e2e" },
+        { "id": "AC-001-c", "must": "The category must be one of the fixed predefined categories", "method": "e2e" },
+        { "id": "AC-001-d", "must": "A claim cannot be submitted without an amount, category, description or date", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-002",
+      "statement": "An employee can attach a receipt to a claim, but it is not required",
+      "stories": [2],
+      "criteria": [
+        { "id": "AC-002-a", "must": "An employee can attach a receipt file to a claim", "method": "e2e" },
+        { "id": "AC-002-b", "must": "A claim can be submitted successfully with no receipt attached", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-003",
+      "statement": "An employee can view the status of their submitted claims",
+      "stories": [3],
+      "criteria": [
+        { "id": "AC-003-a", "must": "An employee sees a list of their own submitted claims", "method": "e2e" },
+        { "id": "AC-003-b", "must": "Each claim in the list shows its current status (pending, approved or rejected)", "method": "e2e" },
+        { "id": "AC-003-c", "must": "An employee cannot see claims submitted by other employees", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-004",
+      "statement": "An employee can edit and resubmit a claim their manager rejected",
+      "stories": [4],
+      "criteria": [
+        { "id": "AC-004-a", "must": "A rejected claim shows the manager's rejection reason to the employee", "method": "e2e" },
+        { "id": "AC-004-b", "must": "An employee can edit the details of a rejected claim", "method": "e2e" },
+        { "id": "AC-004-c", "must": "Resubmitting an edited rejected claim returns it to pending status", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-005",
+      "statement": "A manager can see a queue of expense claims submitted by their direct reports",
+      "stories": [5],
+      "criteria": [
+        { "id": "AC-005-a", "must": "A manager sees pending claims submitted by their direct reports", "method": "e2e" },
+        { "id": "AC-005-b", "must": "A manager does not see claims from employees who are not their direct reports", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-006",
+      "statement": "A manager can approve a claim, making it eligible for payroll export",
+      "stories": [6],
+      "criteria": [
+        { "id": "AC-006-a", "must": "A manager can approve a pending claim from a direct report", "method": "e2e" },
+        { "id": "AC-006-b", "must": "An approved claim's status changes to approved", "method": "e2e" },
+        { "id": "AC-006-c", "must": "A manager cannot approve a claim from an employee who is not their direct report", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-007",
+      "statement": "A manager can reject a claim with a reason",
+      "stories": [7],
+      "criteria": [
+        { "id": "AC-007-a", "must": "A manager can reject a pending claim from a direct report", "method": "e2e" },
+        { "id": "AC-007-b", "must": "Rejecting a claim requires a reason", "method": "e2e" },
+        { "id": "AC-007-c", "must": "A rejected claim's status changes to rejected", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-008",
+      "statement": "Finance can view all approved claims",
+      "stories": [8],
+      "criteria": [
+        { "id": "AC-008-a", "must": "Finance sees a list of all approved claims across all employees", "method": "e2e" },
+        { "id": "AC-008-b", "must": "Finance does not see pending or rejected claims in the approved list", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-009",
+      "statement": "Finance can export approved claims to a downloadable CSV file",
+      "stories": [9],
+      "criteria": [
+        { "id": "AC-009-a", "must": "Finance can trigger an export that produces a downloadable CSV file", "method": "e2e" },
+        { "id": "AC-009-b", "must": "The exported CSV contains the approved claims' data", "method": "e2e" }
+      ]
+    },
+    {
+      "id": "REQ-010",
+      "statement": "Exported claims are marked as exported so they are never exported twice",
+      "stories": [10],
+      "criteria": [
+        { "id": "AC-010-a", "must": "A claim included in an export is marked as exported", "method": "e2e" },
+        { "id": "AC-010-b", "must": "A claim already marked as exported is not included in a subsequent export", "method": "e2e" }
+      ]
+    }
+  ]
+}

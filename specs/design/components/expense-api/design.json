@@ -1,0 +1,28 @@
+{
+  "name": "expense-api",
+  "type": "service",
+  "version": "0.1.0",
+  "language": "Ballerina",
+  "buildpack": "docker",
+  "appPath": "expense-api",
+  "entrypoint": "deployment/service",
+  "exposure": "intranet",
+  "dependencies": [
+    {
+      "kind": "platform-resource",
+      "name": "expense-db",
+      "resourceType": "postgres-cnpg",
+      "description": "Stores employee profiles (with manager assignment), expense claims, and the export/audit state of each claim."
+    },
+    {
+      "kind": "platform-resource",
+      "name": "user-auth",
+      "resourceType": "thunder-app",
+      "parameters": { "scopes": "openid profile email" },
+      "description": "Validates the caller's token on every protected endpoint and supplies the identity used to resolve their role (employee, manager, finance)."
+    }
+  ],
+  "description": "Ballerina REST API owning expense claim submission, manager approval/rejection, and finance's CSV export. Enforces that employees only see their own claims, managers only act on their direct reports' claims, and finance only sees approved claims. Does not send notifications and does not integrate with any external payroll system — export is a downloadable file only.",
+  "stories": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "skillsPinned": ["openapi-conventions", "ballerina", "api-management", "thunder-authentication"]
+}
