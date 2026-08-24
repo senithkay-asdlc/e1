@@ -21,11 +21,13 @@
 set -e
 
 # The root filesystem is read-only at runtime, so the rendered config can
-# never be written back under /etc. Render the template (read-only source)
-# into /tmp/conf.d instead; nginx.conf was pointed at /tmp/conf.d at build
-# time (see Dockerfile).
+# never be written back under /etc, and /tmp (part of that same root fs) is
+# not guaranteed writable either. Render the template (read-only source) into
+# /dev/shm/conf.d instead — a tmpfs the container runtime mounts independent
+# of the root fs's writability; nginx.conf was pointed at /dev/shm/conf.d at
+# build time (see Dockerfile).
 SRC=/etc/nginx/default.conf.template
-OUT_DIR=/tmp/conf.d
+OUT_DIR=/dev/shm/conf.d
 OUT="${OUT_DIR}/default.conf"
 mkdir -p "$OUT_DIR"
 
