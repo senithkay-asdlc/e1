@@ -7,22 +7,62 @@
   "appPath": "expense-api",
   "entrypoint": "deployment/service",
   "exposure": "intranet",
+  "stories": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "description": "Ballerina REST API owning expense claim submission, manager approval/rejection, and finance's CSV export. Enforces that employees only see their own claims, managers only act on their direct reports' claims, and finance only sees approved claims. Does not send notifications and does not integrate with any external payroll system — export is a downloadable file only.",
   "dependencies": [
     {
       "kind": "platform-resource",
       "name": "expense-db",
+      "description": "Stores employee profiles (with manager assignment), expense claims, and the export/audit state of each claim.",
       "resourceType": "postgres-cnpg",
-      "description": "Stores employee profiles (with manager assignment), expense claims, and the export/audit state of each claim."
+      "wiring": {
+        "ref": "e1-expense-db",
+        "envBindings": {
+          "dbname": "EXPENSE_DB_DBNAME",
+          "host": "EXPENSE_DB_HOST",
+          "password": "EXPENSE_DB_PASSWORD",
+          "port": "EXPENSE_DB_PORT",
+          "user": "EXPENSE_DB_USER"
+        }
+      }
     },
     {
       "kind": "platform-resource",
       "name": "user-auth",
+      "description": "Validates the caller's token on every protected endpoint and supplies the identity used to resolve their role (employee, manager, finance).",
       "resourceType": "thunder-app",
-      "parameters": { "scopes": "openid profile email" },
-      "description": "Validates the caller's token on every protected endpoint and supplies the identity used to resolve their role (employee, manager, finance)."
+      "parameters": {
+        "scopes": "openid profile email"
+      },
+      "wiring": {
+        "ref": "e1-user-auth",
+        "envBindings": {
+          "client_id": "USER_AUTH_CLIENT_ID",
+          "issuer": "USER_AUTH_ISSUER",
+          "jwks_url": "USER_AUTH_JWKS_URL",
+          "scopes": "USER_AUTH_SCOPES"
+        }
+      }
     }
   ],
-  "description": "Ballerina REST API owning expense claim submission, manager approval/rejection, and finance's CSV export. Enforces that employees only see their own claims, managers only act on their direct reports' claims, and finance only sees approved claims. Does not send notifications and does not integrate with any external payroll system — export is a downloadable file only.",
-  "stories": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-  "skillsPinned": ["openapi-conventions", "ballerina", "api-management", "thunder-authentication"]
+  "exposesAPI": {
+    "auth": "end-user-required"
+  },
+  "skillsPinned": [
+    "openapi-conventions",
+    "ballerina",
+    "api-management",
+    "thunder-authentication"
+  ]
 }
