@@ -1,6 +1,5 @@
 # Ballerina build output
 target/
-generated/
 Config.toml
 
 # Node / React build output and dependencies
