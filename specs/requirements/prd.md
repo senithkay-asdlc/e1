@@ -33,12 +33,12 @@ A system where employees submit expense claims online, their manager reviews and
 - The web app is built as a TypeScript + React single-page app; backend services are built in Ballerina *(organization default)*.
 - Approval is single-level: each employee has one designated manager who approves or rejects their claims directly — no escalation chain by amount.
 - A rejected claim returns to the employee, who can edit it and resubmit for another round of review.
-- Receipt attachment is optional, not required to submit a claim. *assumed*
+- Receipt attachment is optional, not required to submit a claim.
 - Finance's export produces a downloadable CSV file for manual import into payroll; there is no live integration with a specific payroll provider in this version.
 - Each employee has one designated manager, recorded on the employee's profile; maintaining that assignment is a setup detail and is not itself a user-facing story in this version. *assumed*
 - Claims are tracked in a single default currency; multi-currency support is not handled in this version. *assumed*
-- Expense categories are a fixed predefined list (e.g. Travel, Meals, Lodging, Office Supplies, Other). *assumed*
-- No email/notification alerts are sent on status changes in this version; actors check status by visiting the app. *assumed*
+- Expense categories are a fixed predefined list: Travel, Meals, Lodging, Office Supplies, Other.
+- No email/notification alerts are sent on status changes in this version; actors check status by visiting the app.
 
 ## Out of Scope
 
@@ -50,8 +50,7 @@ A system where employees submit expense claims online, their manager reviews and
 
 ## Open Questions
 
-1. Which specific expense categories should the fixed list contain, beyond the assumed starting set?
-2. Should there be a per-claim or per-period spending limit that triggers extra scrutiny?
+1. Should there be a per-claim or per-period spending limit that triggers extra scrutiny?
 
 ## Further Notes
 
